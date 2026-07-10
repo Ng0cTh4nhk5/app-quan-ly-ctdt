@@ -1,7 +1,7 @@
 # EPIC 4: Dashboard, Notifications & Polish: Implementation Guide
 
 **Sprint 3: Tuần 7 đến Tuần 8** | **Priority: 🟢 P3**
-**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [Code Standards](./convention/00-code-standards.md)
+**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [Code Standards](../convention/00-code-standards.md)
 
 > [!NOTE]
 > Sprint 3: MVP hoàn thiện tính năng. Dashboard, thời gian thực notifications, E2E testing, deployment prep.

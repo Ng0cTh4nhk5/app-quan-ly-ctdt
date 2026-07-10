@@ -1,7 +1,7 @@
 # EPIC 3: Core Business Logic: Implementation Guide
 
 **Sprint 2: Tuần 5 đến Tuần 6** | **Priority: 🟡 P2**
-**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [State Machine](../ba/02_design/functional/state_machine.md) · [Code Standards](./convention/00-code-standards.md)
+**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [State Machine](../ba/02_design/functional/state_machine.md) · [Code Standards](../convention/00-code-standards.md)
 
 > [!IMPORTANT]
 > Sprint 2 tập trung: Syllabus CRUD → PLO/CLO Management → Approval Workflow.

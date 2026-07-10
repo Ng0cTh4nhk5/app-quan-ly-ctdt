@@ -10,8 +10,8 @@ Thư mục này chứa toàn bộ tài liệu kỹ thuật của dự án. Mọi
 
 | Thứ tự | File | Nội dung |
 |---|---|---|
-| 1 | [`00-code-standards.md`](./convention/00-code-standards.md) | Quy chuẩn code: đặt tên, cấu trúc thư mục, patterns, API design |
-| 2 | [`01-git-flow.md`](./convention/01-git-flow.md) | Quy trình Git: nhánh, commit, PR, tình huống thường gặp |
+| 1 | [`00-code-standards.md`](../convention/00-code-standards.md) | Quy chuẩn code: đặt tên, cấu trúc thư mục, patterns, API design |
+| 2 | [`01-git-flow.md`](../convention/01-git-flow.md) | Quy trình Git: nhánh, commit, PR, tình huống thường gặp |
 
 ### Khi bắt đầu làm task (đọc file tương ứng với sprint hiện tại)
 

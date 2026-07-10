@@ -1,7 +1,7 @@
 # EPIC 2: Database & Architecture: Implementation Guide
 
 **Sprint 1: Tuần 3 đến Tuần 4** | **Priority: P1**
-**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [Data Models ERD](../ba/02_design/data_architecture/data_models_erd.md) · [Code Standards](./convention/00-code-standards.md)
+**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [Data Models ERD](../ba/02_design/data_architecture/data_models_erd.md) · [Code Standards](../convention/00-code-standards.md)
 
 > [!IMPORTANT]
 > Sprint 1 tập trung vào: Schema chuẩn → Repository pattern → FE TypeScript migration.

@@ -1,7 +1,7 @@
 # EPIC 1: Security & Foundation Fix: Implementation Guide
 
 **Sprint 0: Tuần 1 đến Tuần 2** | **Priority: 🔴 P0 Blocker**
-**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [Code Standards](./convention/00-code-standards.md)
+**Tham chiếu:** [Task Breakdown](../audit-reports/task_breakdown.md) · [Code Standards](../convention/00-code-standards.md)
 
 > [!CAUTION]
 > Sprint này **KHÔNG ship feature mới**. Mục tiêu duy nhất: fix security holes + unblock development.
@@ -611,7 +611,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 **Acceptance test:**
 - [ ] Exception bất kỳ → trả JSON chuẩn `{success, statusCode, message, traceId}`- [ ] Stack trace KHÔNG bao giờ leak ra response- [ ] Server log có đầy đủ stack trace để debug---### Task 1.3.2: [BE] ApiResponse<T> wrapper
-> Đã mô tả trong [Code Standards §4.2](./convention/00-code-standards.md#42-backend--apiresponset-standard). Copy class `ApiResponse<T>` vào `DTOs/Responses/ApiResponse.cs`.
+> Đã mô tả trong [Code Standards §4.2](../convention/00-code-standards.md#42-backend--apiresponset-standard). Copy class `ApiResponse<T>` vào `DTOs/Responses/ApiResponse.cs`.
 
 ---
 
@@ -1139,7 +1139,7 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons';
 npm install zustand
 ```
 
-> Code đã mô tả chi tiết trong [Code Standards §4.4](./convention/00-code-standards.md#44-frontend--zustand-store-pattern).
+> Code đã mô tả chi tiết trong [Code Standards §4.4](../convention/00-code-standards.md#44-frontend--zustand-store-pattern).
 > Tạo file `src/features/auth/store/authStore.ts` theo pattern đó.
 
 **Acceptance test:**
