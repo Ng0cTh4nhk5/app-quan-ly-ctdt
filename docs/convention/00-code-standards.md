@@ -495,20 +495,57 @@ Response:
 Nhóm phát triển sử dụng OpenAPI Specification (Swagger) làm điểm nối duy nhất giữa Backend và Frontend.
 
 #### 5.4.1. Quy chuẩn phía Backend (.NET)
-1. **Sử dụng Microsoft OpenAPI:** Sử dụng thư viện built-in `Microsoft.AspNetCore.OpenApi` trong .NET để tự động sinh tài liệu API (Swagger).
-2. **Khai báo Http Response Types:** Mọi Controller Action bắt buộc sử dụng thuộc tính `[ProducesResponseType]` để mô tả các mã trạng thái phản hồi.
-3. **Sử dụng XML Comments:** Cung cấp tài liệu trực tiếp trên Code bằng XML tags để công cụ sinh tài liệu lấy mô tả tự động cho Swagger UI.
+
+**Bước 1: Kích hoạt XML Comments trong `.csproj`**
+
+Thêm vào `apps/backend/StartupBackend.csproj`:
+
+```xml
+<PropertyGroup>
+  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <NoWarn>$(NoWarn);1591</NoWarn>
+</PropertyGroup>
+```
+
+**Bước 2: Cấu hình OpenAPI trong `Program.cs`**
+
+```csharp
+// --- Services ---
+builder.Services.AddOpenApi();
+
+// --- Middleware (chỉ bật ở Development) ---
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();       // Endpoint JSON: GET /openapi/v1.json
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/openapi/v1.json", "TPMS-AI API v1");
+    });
+}
+```
+
+> [!NOTE]
+> Swagger UI chỉ bật ở môi trường Development. Truy cập tại `https://localhost:{port}/swagger`.
+> File JSON schema tại: `https://localhost:{port}/openapi/v1.json`.
+
+**Bước 3: Quy tắc XML Comments và `[ProducesResponseType]`**
+
+Mọi Controller Action bắt buộc tuân thủ:
 
 ```csharp
 /// <summary>
-/// Lấy chi tiết đề cương chi tiết theo mã ID.
+/// Lấy chi tiết đề cương theo mã ID.
 /// </summary>
-/// <param name="id">Mã định danh của đề cương chi tiết.</param>
-/// <returns>Thông tin chi tiết của đề cương.</returns>
-/// <response code="200">Tìm thấy đề cương chi tiết và trả về thông tin thành công.</response>
-/// <response code="404">Không tìm thấy đề cương chi tiết với mã ID đã cung cấp.</response>
+/// <param name="id">Mã định danh của đề cương.</param>
+/// <response code="200">Trả về thông tin chi tiết đề cương.</response>
+/// <response code="401">Chưa xác thực: thiếu hoặc sai JWT token.</response>
+/// <response code="403">Không có quyền truy cập endpoint này.</response>
+/// <response code="404">Không tìm thấy đề cương với ID đã cung cấp.</response>
 [HttpGet("{id}")]
+[Authorize(Policy = "CanViewSyllabus")]
 [ProducesResponseType(typeof(ApiResponse<SyllabusResponse>), StatusCodes.Status200OK)]
+[ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+[ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
 [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
 public async Task<ActionResult<ApiResponse<SyllabusResponse>>> GetById(int id)
 {
@@ -517,11 +554,80 @@ public async Task<ActionResult<ApiResponse<SyllabusResponse>>> GetById(int id)
 }
 ```
 
+**Bảng HTTP Status Code chuẩn:**
+
+| Tình huống | Status Code | Ghi chú |
+|---|---|---|
+| Lấy hoặc cập nhật thành công | `200 OK` | Kèm `ApiResponse<T>` có data |
+| Tạo mới thành công | `201 Created` | Kèm `Location` header |
+| Xóa thành công | `204 No Content` | Không có body |
+| Dữ liệu đầu vào sai | `400 Bad Request` | Validation error |
+| Chưa đăng nhập | `401 Unauthorized` | Thiếu hoặc sai JWT |
+| Không đủ quyền | `403 Forbidden` | Sai role hoặc policy |
+| Không tìm thấy | `404 Not Found` | Resource không tồn tại |
+| Lỗi hệ thống | `500 Internal Server Error` | Xử lý qua ExceptionHandlingMiddleware |
+
 #### 5.4.2. Quy chuẩn phía Frontend (React)
-1. **Single Source of Truth:** Code TypeScript bên FE (như Interfaces, API Client Services) phải được cập nhật tương thích dựa trên file OpenAPI schema (`swagger.json`) xuất từ Backend.
-2. **Tự động hóa (Khuyên dùng):** Có thể cài đặt bộ công cụ sinh Code tự động như `openapi-generator-cli` hoặc `orval` để đồng bộ các cấu trúc DTO / Schema trực tiếp từ OpenAPI của Backend, giảm thiểu thao tác thủ công và tránh gõ sai tên thuộc tính.
+
+TypeScript types và API service functions trên FE phải đồng bộ với OpenAPI schema từ BE.
+
+**Công cụ đề xuất: `orval`**
+
+`orval` tự động sinh TypeScript types và Axios API client từ file `openapi/v1.json` của Backend.
+
+Cài đặt:
+
+```bash
+cd apps/frontend
+npm install -D orval
+```
+
+Tạo file `orval.config.ts` ở thư mục gốc frontend:
+
+```typescript
+import { defineConfig } from 'orval';
+
+export default defineConfig({
+  tpmsApi: {
+    input: 'http://localhost:5000/openapi/v1.json',
+    output: {
+      mode: 'tags-split',
+      target: 'src/services/generated/',
+      schemas: 'src/types/generated/',
+      client: 'axios',
+    },
+  },
+});
+```
+
+Thêm script vào `package.json`:
+
+```json
+{
+  "scripts": {
+    "gen:api": "orval"
+  }
+}
+```
+
+Quy trình đồng bộ khi BE thêm hoặc sửa API:
+
+```bash
+# 1. Đảm bảo BE đang chạy ở localhost
+# 2. Chạy lệnh sinh code
+npm run gen:api
+# 3. Commit các file sinh ra vào git
+```
+
+> [!WARNING]
+> Không sửa tay các file trong `src/services/generated/` và `src/types/generated/`.
+> Mọi thay đổi thủ công sẽ bị ghi đè khi chạy lại `gen:api`.
+
+> [!NOTE]
+> Nếu chưa cài `orval`, tối thiểu FE phải tra Swagger UI để kiểm tra đúng tên field, kiểu dữ liệu và đường dẫn endpoint trước khi viết code gọi API.
 
 ---
+
 
 ## 6. Git Workflow & PR Standards
 
