@@ -490,6 +490,37 @@ Response:
 }
 ```
 
+### 5.4. OpenAPI Specification
+
+Nhóm phát triển sử dụng OpenAPI Specification (Swagger) làm giao kèo duy nhất giữa Backend và Frontend.
+
+#### 5.4.1. Quy chuẩn phía Backend (.NET)
+1. **Sử dụng Microsoft OpenAPI:** Sử dụng thư viện built-in `Microsoft.AspNetCore.OpenApi` trong .NET để tự động sinh tài liệu API (Swagger).
+2. **Khai báo Http Response Types:** Mọi Controller Action bắt buộc sử dụng thuộc tính `[ProducesResponseType]` để mô tả các mã trạng thái phản hồi.
+3. **Sử dụng XML Comments:** Cung cấp tài liệu trực tiếp trên Code bằng XML tags để công cụ sinh tài liệu lấy mô tả tự động cho Swagger UI.
+
+```csharp
+/// <summary>
+/// Lấy chi tiết đề cương chi tiết theo mã ID.
+/// </summary>
+/// <param name="id">Mã định danh của đề cương chi tiết.</param>
+/// <returns>Thông tin chi tiết của đề cương.</returns>
+/// <response code="200">Tìm thấy đề cương chi tiết và trả về thông tin thành công.</response>
+/// <response code="404">Không tìm thấy đề cương chi tiết với mã ID đã cung cấp.</response>
+[HttpGet("{id}")]
+[ProducesResponseType(typeof(ApiResponse<SyllabusResponse>), StatusCodes.Status200OK)]
+[ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
+public async Task<ActionResult<ApiResponse<SyllabusResponse>>> GetById(int id)
+{
+    var result = await _service.GetByIdAsync(id);
+    return Ok(ApiResponse<SyllabusResponse>.Success(result));
+}
+```
+
+#### 5.4.2. Quy chuẩn phía Frontend (React)
+1. **Single Source of Truth:** Code TypeScript bên FE (như Interfaces, API Client Services) phải được cập nhật tương thích dựa trên file OpenAPI schema (`swagger.json`) xuất từ Backend.
+2. **Tự động hóa (Khuyên dùng):** Có thể cài đặt bộ công cụ sinh Code tự động như `openapi-generator-cli` hoặc `orval` để đồng bộ các cấu trúc DTO / Schema trực tiếp từ OpenAPI của Backend, giảm thiểu thao tác thủ công và tránh gõ sai tên thuộc tính.
+
 ---
 
 ## 6. Git Workflow & PR Standards
