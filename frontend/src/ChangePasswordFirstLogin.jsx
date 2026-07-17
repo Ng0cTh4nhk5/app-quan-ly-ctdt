@@ -2,7 +2,7 @@
 // Swagger: POST /auth/change-password-first → { newPassword, confirmPassword }
 // Cần Bearer token trong header
 import { useState } from "react";
-import { apiChangePasswordFirst } from "./api";
+import { apiChangePasswordFirst } from "./services/authService";
 
 const inputStyle = {
   width: "100%", padding: "10px 42px 10px 14px", border: "1.5px solid #D1D5DB",
