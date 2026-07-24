@@ -86,7 +86,8 @@ namespace StartupBackend.Controllers
                 TrangThai = "Hoạt động",
                 MatKhau = BCrypt.Net.BCrypt.HashPassword("abc123"), // Mật khẩu mặc định như code Khoa
                 TenantId = "HCMCOU", // Gán mặc định theo hệ thống
-                NgayTao = DateTime.UtcNow
+                NgayTao = DateTime.UtcNow,
+                IsFirstLogin = true // tài khoản mới → bắt đổi mật khẩu ở lần đăng nhập đầu
             };
 
             _context.TaiKhoans.Add(newMember);

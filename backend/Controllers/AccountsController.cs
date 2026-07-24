@@ -75,6 +75,9 @@ namespace StartupBackend.Controllers
                     // mật khẩu mặc định
                     MatKhau = BCrypt.Net.BCrypt.HashPassword("abc123"),
 
+                    // tài khoản mới → bắt đổi mật khẩu ở lần đăng nhập đầu
+                    IsFirstLogin = true,
+
                     TenantId = creator.TenantId,
                     NgayTao = DateTime.UtcNow,
                     NguoiTaoId = creator.Id

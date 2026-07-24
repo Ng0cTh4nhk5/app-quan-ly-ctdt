@@ -68,7 +68,8 @@ namespace StartupBackend.Controllers
                 User = new UserInfo
                 {
                     Role = user.VaiTro.TenVaiTro,
-                    Name = user.HoTenNguoiDung
+                    Name = user.HoTenNguoiDung,
+                    IsFirstLogin = user.IsFirstLogin
                 }
             });
         }
@@ -92,6 +93,9 @@ namespace StartupBackend.Controllers
 
             // băm mật khẩu mới trước khi lưu
             user.MatKhau = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+            // đã tự đổi mật khẩu → hết trạng thái đăng nhập lần đầu
+            user.IsFirstLogin = false;
 
             await _context.SaveChangesAsync();
 
@@ -193,6 +197,10 @@ namespace StartupBackend.Controllers
                 if (user == null) return BadRequest(new { message = "Người dùng không tồn tại!" });
 
                 user.MatKhau = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+
+                // user đã tự đặt mật khẩu mới → không cần bắt đổi ở lần đăng nhập đầu nữa
+                user.IsFirstLogin = false;
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new { message = "Đổi mật khẩu thành công! Vui lòng đăng nhập lại." });

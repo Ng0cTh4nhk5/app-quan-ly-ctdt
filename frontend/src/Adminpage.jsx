@@ -5,7 +5,7 @@
 // DELETE /api/Accounts/delete-account/{id}
 import { useState, useEffect } from "react";
 import emailjs from '@emailjs/browser';
-import { apiGetAccounts, apiCreateAccount, apiUpdateAccount, apiDeleteAccount, apiGetKhoaList, apiGetProgramsList } from "./api";
+import { apiGetAccounts, apiCreateAccount, apiUpdateAccount, apiDeleteAccount, apiGetKhoaList, apiGetProgramsList } from "./services/accountService";
 
 const statusColor = {
   "Hoạt động": { bg: "#D1FAE5", color: "#065F46" },
@@ -152,7 +152,7 @@ export default function Adminquanlytaikhoan({ user, onLogout }) {
   const [programsList, setProgramsList] = useState([]);
 
   useEffect(() => {
-    emailjs.init('M2STS4wuKh6ya7GS6');
+    emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
     // Load khoa và chương trình đào tạo cho combo box
     apiGetKhoaList().then(({ ok, data }) => {
       if (ok) {
@@ -328,7 +328,7 @@ export default function Adminquanlytaikhoan({ user, onLogout }) {
   const sendEmailToUser = async (userData) => {
     setEmailSending(true);
     try {
-      await emailjs.send('service_obh37uy', 'template_nts5ofd', {
+      await emailjs.send(import.meta.env.VITE_EMAILJS_SERVICE_ID, import.meta.env.VITE_EMAILJS_TEMPLATE_ID, {
         to_email: userData.email,
         to_name: userData.name,
         username: userData.username,
