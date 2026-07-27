@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using StartupBackend.Data;
@@ -74,7 +74,8 @@ namespace StartupBackend.Controllers
             });
         }
 
-// đổi mật khẩu lần đầu
+// đổi mật khẩu lần đầu — yêu cầu đăng nhập (JWT claim cần được populate)
+        [Authorize]
         [HttpPost("change-password-first")]
         public async Task<IActionResult> ChangePasswordFirst([FromBody] ChangePasswordFirstRequest request)
         {

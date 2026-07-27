@@ -49,5 +49,18 @@ export const resolveRoles = (data: any): Role[] => {
 };
 
 // Trang chủ mặc định theo role (dùng cho redirect sau login)
-export const homePathForRoles = (roles: Role[]): string =>
-  roles.includes(Role.PM) ? '/admin' : '/syllabus';
+// TODO Sprint 1: tạo route riêng cho HD (/review) và BGH (/dashboard)
+const HOME_PATHS: Record<Role, string> = {
+  [Role.PM]:  '/admin',
+  [Role.TK]:  '/syllabus',
+  [Role.GV]:  '/syllabus',
+  [Role.HD]:  '/syllabus',  // tạm thời, chờ route /review
+  [Role.BGH]: '/syllabus',  // tạm thời, chờ route /dashboard
+};
+
+export const homePathForRoles = (roles: Role[]): string => {
+  for (const role of roles) {
+    if (HOME_PATHS[role]) return HOME_PATHS[role];
+  }
+  return '/syllabus';
+};
