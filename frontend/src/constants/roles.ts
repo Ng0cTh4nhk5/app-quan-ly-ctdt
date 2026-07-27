@@ -45,7 +45,10 @@ export const resolveRoles = (data: any): Role[] => {
   const mapped = LEGACY_ROLE_MAP[legacyStr] ?? LEGACY_ROLE_MAP[legacyId];
   if (mapped) return [mapped];
 
-  return [Role.GV]; // fallback GV
+  // Không resolve được role → trả rỗng, Router sẽ redirect sang /unauthorized
+  // KHÔNG dùng fallback GV vì có thể cấp quyền sai cho người dùng không xác định
+  console.warn('[resolveRoles] Không thể xác định role từ response:', data);
+  return [];
 };
 
 // Trang chủ mặc định theo role (dùng cho redirect sau login)
@@ -62,5 +65,5 @@ export const homePathForRoles = (roles: Role[]): string => {
   for (const role of roles) {
     if (HOME_PATHS[role]) return HOME_PATHS[role];
   }
-  return '/syllabus';
+  return '/unauthorized'; // roles rỗng hoặc không map được → không cho vào
 };

@@ -22,6 +22,18 @@ namespace StartupBackend.Controllers
             _context = context;
         }
 
+        // Helper: chuyển role string trong JWT claim (legacy ADMIN/MANAGER/COMPILER)
+        // sang roleId số nguyên để so sánh quyền hạn.
+        // Tập trung ở một chỗ — không lặp switch expression khắp controller.
+        private int GetRoleIdFromClaim() =>
+            User.FindFirst(ClaimTypes.Role)?.Value?.ToUpper() switch
+            {
+                "ADMIN"    => 1,
+                "MANAGER"  => 2,
+                "COMPILER" => 3,
+                _          => int.MaxValue // role không xác định → quyền thấp nhất
+            };
+
         // tạo tài khoản mới
         [HttpPost]
         public async Task<IActionResult> CreateAccount([FromBody] AccountDTOs request)
@@ -108,16 +120,8 @@ namespace StartupBackend.Controllers
             [FromQuery] string? status = null)
         {
             var currentUserIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value?.ToUpper();
-
             int.TryParse(currentUserIdString, out int currentUserId);
-
-            int currentRoleId = currentUserRole switch
-            {
-                "ADMIN" => 1,
-                "MANAGER" => 2,
-                _ => 3 // COMPILER
-            };
+            int currentRoleId = GetRoleIdFromClaim();
             var query = _context.TaiKhoans
                 .Include(a => a.VaiTro)
                 .Include(a => a.ChuongTrinhDaoTao)
@@ -182,11 +186,10 @@ namespace StartupBackend.Controllers
                 return NotFound(new { message = "Không tìm thấy tài khoản!" });
 
             // check role của người đang sửa
-            var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToUpper();
-            int currentRoleId = currentUserRole switch { "ADMIN" => 1, "MANAGER" => 2, _ => 3 };
+            int currentRoleId = GetRoleIdFromClaim();
 
             // nếu người sửa có quyền thấp hơn hoặc bằng người bị sửa -> báo lỗi
-            var currentUserIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var currentUserIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             int.TryParse(currentUserIdString, out int currentUserId);
 
             if (currentRoleId > 1 && account.VaiTroId <= currentRoleId && account.Id != currentUserId)
@@ -241,8 +244,7 @@ namespace StartupBackend.Controllers
                 return BadRequest(new { message = "Không thể xóa tài khoản này!" });
             }
 
-            var currentUserRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToUpper();
-            int currentRoleId = currentUserRole switch { "ADMIN" => 1, "MANAGER" => 2, _ => 3 };
+            int currentRoleId = GetRoleIdFromClaim();
 
             if (currentRoleId > 1 && account.VaiTroId <= currentRoleId)
             {
