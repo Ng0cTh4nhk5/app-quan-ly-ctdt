@@ -44,6 +44,9 @@ namespace StartupBackend.Migrations
                     b.Property<string>("HocVi")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsFirstLogin")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("MaCTDT")
                         .HasColumnType("text");
 
@@ -100,6 +103,7 @@ namespace StartupBackend.Migrations
                             Id = 1,
                             Email = "admin@system.com",
                             HoTenNguoiDung = "Root Admin",
+                            IsFirstLogin = false,
                             MatKhau = "$2a$11$MI7VEPRdZ9V3H9p1LU.57OvSFgPjViRCDvgjW/mB5oy1xpjn5PdPu",
                             NgayTao = new DateTime(2026, 7, 2, 8, 24, 40, 681, DateTimeKind.Utc).AddTicks(377),
                             TenDangNhap = "admin",

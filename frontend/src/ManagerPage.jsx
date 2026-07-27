@@ -79,9 +79,10 @@ export default function ManagerPage({ user, onLogout }) {
           {NAV_TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
               padding:'14px 28px', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:15,
-              background: tab === t.key ? 'rgba(255,255,255,0.18)' : 'transparent',
+              background: tab === t.key ? 'linear-gradient(90deg,#005AE0,#00317A)' : 'transparent',
               color:'#fff', fontWeight: tab === t.key ? 700 : 400,
-              borderBottom: tab === t.key ? '3px solid #fff' : '3px solid transparent',
+              borderRadius: tab === t.key ? '6px 6px 0 0' : 0,
+              boxShadow: tab === t.key ? 'inset 0 0 0 1.5px rgba(255,255,255,0.25)' : 'none',
               transition:'all 0.18s',
               whiteSpace: 'nowrap',
             }}>

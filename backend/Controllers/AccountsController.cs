@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -72,8 +72,11 @@ namespace StartupBackend.Controllers
                     HocVi = request.HocVi,
                     TrinhDoChuyenMon = request.TrinhDoChuyenMon,
 
-                    // mật khẩu mặc định
-                    MatKhau = BCrypt.Net.BCrypt.HashPassword("abc123"),
+                    // mật khẩu mặc định — phải khớp với thông báo gửi tới người dùng
+                    MatKhau = BCrypt.Net.BCrypt.HashPassword("Abc@123"),
+
+                    // tài khoản mới → bắt đổi mật khẩu ở lần đăng nhập đầu
+                    IsFirstLogin = true,
 
                     TenantId = creator.TenantId,
                     NgayTao = DateTime.UtcNow,

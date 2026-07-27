@@ -16,6 +16,7 @@
     {
         public string Role { get; set; }
         public string Name { get; set; }
+        public bool IsFirstLogin { get; set; }
     }
 
     public class ChangePasswordFirstRequest

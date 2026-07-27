@@ -4,6 +4,7 @@ import Toast from "../../components/Toast";
 import TaoMonHoc from "./TaoMonHoc";
 import ChinhSuaMonHoc from "./ChinhSuaMonHoc";
 import { getSubjects, deleteSubject } from "../../services/subjectService";
+import axiosInstance from "../../services/axiosInstance";
 
 // Normalize trạng thái phân công về 2 giá trị chuẩn
 const normalizePhanCong = (raw) => {
@@ -53,15 +54,10 @@ export default function MonHoc() {
       // Gọi song song: tất cả môn + danh sách chưa phân công
       const [resAll, resUnassigned] = await Promise.all([
         getSubjects(params),
-        fetch(
-          "https://startup-backend-production-191b.up.railway.app/manager/subjects/unassigned",
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${sessionStorage.getItem("token") || ""}`,
-            },
-          }
-        ).then((r) => r.json()).catch(() => []),
+        axiosInstance
+          .get("/manager/subjects/unassigned")
+          .then((r) => r.data)
+          .catch(() => []),
       ]);
 
       const arr = Array.isArray(resAll) ? resAll : (resAll.data ?? resAll.items ?? []);

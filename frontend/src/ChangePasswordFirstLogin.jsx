@@ -2,7 +2,7 @@
 // Swagger: POST /auth/change-password-first → { newPassword, confirmPassword }
 // Cần Bearer token trong header
 import { useState } from "react";
-import { apiChangePasswordFirst } from "./api";
+import { apiChangePasswordFirst } from "./services/authService";
 
 const inputStyle = {
   width: "100%", padding: "10px 42px 10px 14px", border: "1.5px solid #D1D5DB",
@@ -45,8 +45,6 @@ export default function ChangePasswordFirstLogin({ user, onDone, onCancel }) {
   const [confirmPass, setConfirmPass] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [activeTab, setActiveTab] = useState("Tài Khoản");
   const [error, setError] = useState("");
   const [toast, setToast] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -107,42 +105,14 @@ export default function ChangePasswordFirstLogin({ user, onDone, onCancel }) {
 
         {/* Header */}
         <div style={{ flexShrink: 0, background: "#fff", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-            <div style={{ fontWeight: 800, fontSize: 22, color: "#005AE0" }}>Logo</div>
-            <div style={{ position: "relative" }}>
-              <svg style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <input placeholder="Tìm kiếm" style={{ paddingLeft: 32, paddingRight: 12, height: 34, border: "1.5px solid #D1D5DB", borderRadius: 20, fontSize: 14, outline: "none", width: 210, background: "#fff", color: "#374151" }} />
+          <div style={{ fontWeight: 800, fontSize: 22, color: "#005AE0" }}>Logo</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#005AE0,#00317A)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 15 }}>{userInitial}</div>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.2, color: "#111827" }}>{displayName}</div>
+              <button onClick={handleCancelAction} style={{ fontSize: 11, color: "#EF4444", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "inherit" }}>Đăng xuất</button>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{ position: "relative" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => setShowDropdown(!showDropdown)}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#005AE0,#00317A)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 15 }}>{userInitial}</div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14, lineHeight: 1.2, color: "#111827" }}>{displayName}</div>
-                  <div style={{ fontSize: 12, color: "#6B7280" }}>Admin</div>
-                </div>
-                <span style={{ fontSize: 10, color: "#6B7280" }}>▼</span>
-              </div>
-              {showDropdown && (
-                <div style={{ position: "absolute", right: 0, top: 48, background: "#fff", border: "1px solid #E5E7EB", borderRadius: 8, boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 200, minWidth: 140 }}>
-                  <div style={{ padding: "10px 16px", cursor: "pointer", fontSize: 14, color: "#374151" }}
-                    onClick={() => { setShowDropdown(false); handleCancelAction(); }}>→ Đăng xuất</div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Navbar */}
-        <div style={{ flexShrink: 0, background: "linear-gradient(90deg, #005AE0 0%, #00317A 100%)", display: "flex", alignItems: "stretch", padding: "0 24px", gap: 4 }}>
-          {["Trang chủ", "Môn Học", "Tài Khoản"].map((tab) => (
-            <button key={tab} onClick={() => setActiveTab(tab)} style={{ padding: "14px 24px", border: "none", background: activeTab === tab ? "rgba(255,255,255,0.15)" : "transparent", color: "#fff", fontWeight: activeTab === tab ? 700 : 400, fontSize: 15, cursor: "pointer", fontFamily: "inherit" }}>
-              {tab}
-            </button>
-          ))}
         </div>
 
         {/* Body */}
@@ -157,7 +127,7 @@ export default function ChangePasswordFirstLogin({ user, onDone, onCancel }) {
               Xin chào <strong>{displayName}</strong>, bạn cần thay đổi mật khẩu trước khi tiếp tục sử dụng hệ thống!
             </div>
             <div style={{ fontSize: 12, color: "#005AE0", marginBottom: 20, background: "#EFF6FF", padding: "8px 12px", borderRadius: 6, border: "1px solid #BFDBFE" }}>
-              💡 Mật khẩu mặc định của bạn là: <strong>Abc@123</strong>
+              💡 Mật khẩu mặc định đã được gửi qua email khi tài khoản được tạo.
             </div>
 
             <div style={{ marginBottom: 20 }}>

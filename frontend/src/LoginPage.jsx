@@ -1,7 +1,13 @@
 // LoginPage.jsx
-// Swagger: POST /auth/login → { username, password }
-// Lưu ý: field là "username" không phải "email"
-import { useState } from "react";
+// Giao diện scene gốc (khung cảnh xanh + hình trang trí trôi nổi).
+// Task 1.5.4: form controls dùng Ant Design (Form/Input/Button) — theme dark cục bộ cho khớp card.
+// Task 1.5.1: mọi API call qua axiosInstance (VITE_API_URL), không còn fetch/hardcoded URL.
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ConfigProvider, Form, Input, Button, theme as antdTheme } from 'antd';
+import { useAuthStore } from './features/auth/store/authStore';
+import { homePathForRoles } from './constants/roles';
+import { apiForgotPassword } from './services/authService';
 
 function ArcLogo() {
   return (
@@ -66,76 +72,74 @@ const Shapes = () => (
   </>
 );
 
-export default function LoginPage({ onLogin }) {
-  const [page, setPage] = useState("login"); // "login" | "forgot"
+// Theme antd cục bộ: dark + translucent để khớp card trong scene xanh
+const sceneTheme = {
+  algorithm: antdTheme.darkAlgorithm,
+  token: {
+    colorPrimary: '#60a5fa',
+    colorBgContainer: 'rgba(255,255,255,0.08)',
+    colorBorder: 'rgba(147,197,253,0.25)',
+    colorText: '#e0eaff',
+    colorTextPlaceholder: 'rgba(147,197,253,0.45)',
+    borderRadius: 7,
+    fontFamily: "'Sora', sans-serif",
+    fontSize: 13,
+  },
+  components: {
+    Input: { controlHeight: 34 },
+    Button: { controlHeight: 34 },
+  },
+};
 
-  // Login state
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPass, setShowPass] = useState(false);
+export default function LoginPage() {
+  const navigate = useNavigate();
+  const login = useAuthStore((s) => s.login);
+
+  const [page, setPage] = useState('login'); // "login" | "forgot"
   const [loading, setLoading] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [error, setError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
 
-  // Forgot password state
-  const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotLoading, setForgotLoading] = useState(false);
-  const [forgotError, setForgotError] = useState("");
-  const [forgotSuccess, setForgotSuccess] = useState("");
-
-  const handleLogin = async () => {
-    if (!username || !password) {
-      setLoginError("Vui lòng nhập đầy đủ thông tin!");
-      return;
-    }
-    setLoginError("");
+  const handleLogin = async ({ username, password }) => {
+    setError('');
     setLoading(true);
-
-    const result = await onLogin(username, password);
+    const result = await login(username, password);
+    setLoading(false);
 
     if (!result.success) {
-      setLoginError(result.message);
-    }
-    setLoading(false);
-  };
-
-  const handleForgot = async () => {
-    if (!forgotEmail) {
-      setForgotError("Vui lòng nhập email!");
+      setError(result.message);
       return;
     }
-    setForgotError("");
-    setForgotLoading(true);
 
-    try {
-      const res = await fetch(
-        'https://startup-backend-production-d78d.up.railway.app/auth/forgot-password',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: forgotEmail }),
-        }
-      );
-      if (res.ok) {
-        setForgotSuccess("Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư.");
-      } else {
-        const data = await res.json().catch(() => ({}));
-        setForgotError(data?.message || "Email không tồn tại trong hệ thống!");
-      }
-    } catch {
-      setForgotError("Lỗi kết nối server, thử lại sau!");
+    if (result.user.isFirstLogin) {
+      navigate('/change-password', { replace: true });
+    } else {
+      navigate(homePathForRoles(result.user.roles), { replace: true });
     }
-    setForgotLoading(false);
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      if (page === "login") handleLogin();
-      else handleForgot();
+  const handleForgot = async ({ email }) => {
+    setError('');
+    setForgotSuccess('');
+    setLoading(true);
+    const { ok, data } = await apiForgotPassword(email);
+    setLoading(false);
+
+    if (ok) {
+      setForgotSuccess('Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư.');
+    } else {
+      setError(data?.message || 'Email không tồn tại trong hệ thống!');
     }
+  };
+
+  const switchPage = (next) => {
+    setPage(next);
+    setError('');
+    setForgotSuccess('');
   };
 
   return (
-    <>
+    <ConfigProvider theme={sceneTheme}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -219,9 +223,9 @@ export default function LoginPage({ onLogin }) {
           left: 50%;
           top: 50%;
           transform: translate(-50%, -50%);
-          width: 30%;
-          min-width: 220px;
-          max-width: 300px;
+          width: 34%;
+          min-width: 240px;
+          max-width: 320px;
           z-index: 2;
         }
 
@@ -235,61 +239,44 @@ export default function LoginPage({ onLogin }) {
           letter-spacing: 0.01em;
         }
 
-        .field-group { margin-bottom: 9px; }
-
-        .field-label {
-          font-size: 9px;
+        /* ── Ant Design overrides: nén khoảng cách + style label theo design gốc ── */
+        .login-card .ant-form-item { margin-bottom: 10px; }
+        .login-card .ant-form-item .ant-form-item-label { padding-bottom: 4px; }
+        .login-card .ant-form-item-label > label {
+          font-size: 10px;
           color: #93c5fd;
-          margin-bottom: 4px;
           letter-spacing: 0.05em;
           text-transform: uppercase;
+          height: auto;
         }
-
-        .input-wrap { position: relative; }
-
-        .login-input {
-          width: 100%;
-          padding: 7px 10px;
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(147,197,253,0.25);
-          border-radius: 7px;
-          color: #e0eaff;
+        .login-card .ant-form-item-explain-error {
           font-size: 10px;
-          font-family: 'Sora', sans-serif;
-          outline: none;
-          transition: border-color 0.2s, background 0.2s;
-          /* Quan trọng: đảm bảo input không bị overflow ra ngoài card */
-          box-sizing: border-box;
-          display: block;
+          color: #fca5a5;
         }
-        .login-input::placeholder { color: rgba(147,197,253,0.45); }
-        .login-input:focus { border-color: #60a5fa; background: rgba(255,255,255,0.13); }
-        .login-input.error { border-color: #f87171; }
+        .login-card .ant-input,
+        .login-card .ant-input-affix-wrapper { font-family: 'Sora', sans-serif; }
 
-        /* Password input cần padding-right để không bị đè bởi eye button */
-        .login-input.with-eye { padding-right: 28px; }
-
-        .eye-btn {
-          position: absolute;
-          right: 7px;
-          top: 50%;
-          transform: translateY(-50%);
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-size: 11px;
-          padding: 0;
-          line-height: 1;
-          color: #93c5fd;
+        /* Nút chính giữ gradient của design gốc */
+        .login-card .ant-btn-primary {
+          background: linear-gradient(135deg, #1e3a8a, #2054d0);
+          color: #dbeafe;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          box-shadow: 0 4px 18px #1e3a8a55;
+        }
+        .login-card .ant-btn-primary:not(:disabled):hover {
+          background: linear-gradient(135deg, #1e3a8a, #2054d0);
+          opacity: 0.9;
+          transform: translateY(-1.5px);
         }
 
         .forgot-link {
           display: block;
           text-align: right;
-          font-size: 9px;
+          font-size: 10px;
           color: #88b4e8;
-          margin-top: -2px;
-          margin-bottom: 11px;
+          margin-top: 2px;
+          margin-bottom: 12px;
           cursor: pointer;
           background: none;
           border: none;
@@ -304,9 +291,9 @@ export default function LoginPage({ onLogin }) {
           display: flex;
           align-items: center;
           gap: 4px;
-          font-size: 9px;
+          font-size: 10px;
           color: #88b4e8;
-          margin-bottom: 11px;
+          margin-bottom: 12px;
           cursor: pointer;
           background: none;
           border: none;
@@ -317,48 +304,18 @@ export default function LoginPage({ onLogin }) {
         .back-link:hover { color: #dbeafe; }
 
         .error-message {
-          font-size: 9px;
+          font-size: 10px;
           color: #fca5a5;
-          margin-bottom: 7px;
+          margin-bottom: 8px;
           text-align: center;
         }
 
         .success-message {
-          font-size: 9px;
+          font-size: 10px;
           color: #6ee7b7;
-          margin-bottom: 7px;
+          margin-bottom: 8px;
           text-align: center;
         }
-
-        .main-btn {
-          width: 100%;
-          padding: 8px;
-          background: linear-gradient(135deg, #1e3a8a, #2054d0);
-          color: #dbeafe;
-          border: none;
-          border-radius: 7px;
-          font-family: 'Sora', sans-serif;
-          font-size: 11px;
-          font-weight: 600;
-          cursor: pointer;
-          letter-spacing: 0.05em;
-          box-shadow: 0 4px 18px #1e3a8a55;
-          transition: opacity 0.2s, transform 0.15s;
-        }
-        .main-btn:hover { opacity: 0.9; transform: translateY(-1.5px); }
-        .main-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-        .spinner {
-          display: inline-block;
-          width: 9px; height: 9px;
-          border: 2px solid #60a5fa44;
-          border-top-color: #e0eaff;
-          border-radius: 50%;
-          animation: spin 0.7s linear infinite;
-          vertical-align: middle;
-          margin-right: 4px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
       <div className="login-root">
@@ -366,94 +323,75 @@ export default function LoginPage({ onLogin }) {
           {/* Tất cả nội dung trong login-content để nằm đúng trong scene */}
           <div className="login-content">
             <div className="inner-panel" />
-            <span className="page-label">{page === "login" ? "Đăng nhập" : "Quên mật khẩu"}</span>
+            <span className="page-label">{page === 'login' ? 'Đăng nhập' : 'Quên mật khẩu'}</span>
             <Shapes />
 
             <div className="login-card">
-              {page === "login" ? (
+              {page === 'login' ? (
                 <div className="card-inner" key="login">
                   <div className="card-title">Login</div>
 
-                  <div className="field-group">
-                    <div className="field-label">Tên đăng nhập</div>
-                    <div className="input-wrap">
-                      <input
-                        className={`login-input ${loginError ? 'error' : ''}`}
-                        type="text"
-                        placeholder="username"
-                        value={username}
-                        onChange={e => { setUsername(e.target.value); setLoginError(""); }}
-                        onKeyPress={handleKeyPress}
-                      />
-                    </div>
-                  </div>
+                  <Form onFinish={handleLogin} layout="vertical" requiredMark={false}>
+                    <Form.Item
+                      name="username"
+                      label="Tên đăng nhập"
+                      rules={[{ required: true, message: 'Nhập tên đăng nhập' }]}
+                    >
+                      <Input placeholder="username" autoFocus />
+                    </Form.Item>
 
-                  <div className="field-group">
-                    <div className="field-label">Password</div>
-                    <div className="input-wrap">
-                      <input
-                        className={`login-input with-eye ${loginError ? 'error' : ''}`}
-                        type={showPass ? "text" : "password"}
-                        placeholder="Password"
-                        value={password}
-                        onChange={e => { setPassword(e.target.value); setLoginError(""); }}
-                        onKeyPress={handleKeyPress}
-                      />
-                      <button className="eye-btn" onClick={() => setShowPass(!showPass)} tabIndex={-1}>
-                        {showPass ? "🙈" : "👁"}
-                      </button>
-                    </div>
-                  </div>
+                    <Form.Item
+                      name="password"
+                      label="Password"
+                      rules={[{ required: true, message: 'Nhập mật khẩu' }]}
+                    >
+                      <Input.Password placeholder="Password" />
+                    </Form.Item>
 
-                  {loginError && <div className="error-message">{loginError}</div>}
+                    {error && <div className="error-message">{error}</div>}
 
-                  <button className="forgot-link" onClick={() => { setPage("forgot"); setLoginError(""); }}>
-                    Forgot Password?
-                  </button>
+                    <button type="button" className="forgot-link" onClick={() => switchPage('forgot')}>
+                      Forgot Password?
+                    </button>
 
-                  <button className="main-btn" onClick={handleLogin} disabled={loading}>
-                    {loading && <span className="spinner" />}
-                    {loading ? "Đang đăng nhập..." : "Sign in"}
-                  </button>
+                    <Button type="primary" htmlType="submit" block loading={loading}>
+                      {loading ? 'Đang đăng nhập...' : 'Sign in'}
+                    </Button>
+                  </Form>
                 </div>
               ) : (
                 <div className="card-inner" key="forgot">
                   <div className="card-title">Quên mật khẩu</div>
 
-                  <div className="field-group">
-                    <div className="field-label">Email</div>
-                    <div className="input-wrap">
-                      <input
-                        className={`login-input ${forgotError ? 'error' : ''}`}
-                        type="email"
-                        placeholder="email@example.com"
-                        value={forgotEmail}
-                        onChange={e => { setForgotEmail(e.target.value); setForgotError(""); setForgotSuccess(""); }}
-                        onKeyPress={handleKeyPress}
-                      />
-                    </div>
-                  </div>
+                  <Form onFinish={handleForgot} layout="vertical" requiredMark={false}>
+                    <Form.Item
+                      name="email"
+                      label="Email"
+                      rules={[
+                        { required: true, message: 'Nhập email' },
+                        { type: 'email', message: 'Email không hợp lệ' },
+                      ]}
+                    >
+                      <Input placeholder="email@example.com" autoFocus />
+                    </Form.Item>
 
-                  {forgotError && <div className="error-message">{forgotError}</div>}
-                  {forgotSuccess && <div className="success-message">{forgotSuccess}</div>}
+                    {error && <div className="error-message">{error}</div>}
+                    {forgotSuccess && <div className="success-message">{forgotSuccess}</div>}
 
-                  <button className="back-link" onClick={() => {
-                    setPage("login");
-                    setForgotEmail(""); setForgotError(""); setForgotSuccess("");
-                  }}>
-                    ← Quay lại đăng nhập
-                  </button>
+                    <button type="button" className="back-link" onClick={() => switchPage('login')}>
+                      ← Quay lại đăng nhập
+                    </button>
 
-                  <button className="main-btn" onClick={handleForgot} disabled={forgotLoading}>
-                    {forgotLoading && <span className="spinner" />}
-                    {forgotLoading ? "Đang gửi..." : "Gửi email"}
-                  </button>
+                    <Button type="primary" htmlType="submit" block loading={loading}>
+                      {loading ? 'Đang gửi...' : 'Gửi email'}
+                    </Button>
+                  </Form>
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
-    </>
+    </ConfigProvider>
   );
 }

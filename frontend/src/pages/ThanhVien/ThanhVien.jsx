@@ -12,9 +12,9 @@ import {
 } from '../../services/memberService'
 
 // ── EmailJS config (cùng với Adminpage) ──
-const EMAILJS_SERVICE  = 'service_obh37uy'
-const EMAILJS_TEMPLATE = 'template_nts5ofd'
-const EMAILJS_PUBLIC   = 'M2STS4wuKh6ya7GS6'
+const EMAILJS_SERVICE  = import.meta.env.VITE_EMAILJS_SERVICE_ID
+const EMAILJS_TEMPLATE = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+const EMAILJS_PUBLIC   = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
 const DEFAULT_PASSWORD = 'Abc@123'
 
 const STATUS_MAP = {

@@ -35,6 +35,9 @@ namespace StartupBackend.Models
         public string? HocHam { get; set; }
         public string? HocVi { get; set; }
         public string? TrinhDoChuyenMon { get; set; }
+
+        // true = tài khoản mới tạo với mật khẩu mặc định, bắt buộc đổi mật khẩu ở lần đăng nhập đầu
+        public bool IsFirstLogin { get; set; } = false;
         public DateTime NgayTao { get; set; } = DateTime.UtcNow;
         public int? NguoiTaoId { get; set; } 
         public string? MaKhoa { get; set; }

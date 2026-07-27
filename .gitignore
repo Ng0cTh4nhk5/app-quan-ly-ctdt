@@ -1,5 +1,8 @@
 # Separate Documentation Repo
 
+# Local AI tooling config
+.claude/
+
 # Node.js / Frontend
 **/node_modules/
 **/dist/
