@@ -17,7 +17,7 @@ namespace StartupBackend.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.25")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -96,21 +96,6 @@ namespace StartupBackend.Migrations
                     b.HasIndex("VaiTroId");
 
                     b.ToTable("TaiKhoans");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Email = "admin@system.com",
-                            HoTenNguoiDung = "Root Admin",
-                            IsFirstLogin = false,
-                            MatKhau = "$2a$11$MI7VEPRdZ9V3H9p1LU.57OvSFgPjViRCDvgjW/mB5oy1xpjn5PdPu",
-                            NgayTao = new DateTime(2026, 7, 2, 8, 24, 40, 681, DateTimeKind.Utc).AddTicks(377),
-                            TenDangNhap = "admin",
-                            TenantId = "HCMCOU",
-                            TrangThai = "Hoạt động",
-                            VaiTroId = 1
-                        });
                 });
 
             modelBuilder.Entity("StartupBackend.Models.Khoas", b =>

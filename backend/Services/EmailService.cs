@@ -16,14 +16,14 @@ namespace StartupBackend.Services
 
         public async System.Threading.Tasks.Task SendEmailAsync(string toEmail, string subject, string htmlMessage)
         {
-            var apiKey = _config["EmailSettings:BrevoApiKey"];
+            var apiKey = _config["EmailSettings:SenderPassword"];
 
             var payload = new
             {
                 sender = new
                 {
                     name = _config["EmailSettings:SenderName"],
-                    email = _config["EmailSettings:SenderEmail"]
+                    email = _config["EmailSettings:EmailUsername"]
                 },
                 to = new[] { new { email = toEmail } },
                 subject = subject,

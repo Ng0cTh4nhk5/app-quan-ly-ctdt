@@ -9,6 +9,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using StartupBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StartupBackend.Controllers
 {

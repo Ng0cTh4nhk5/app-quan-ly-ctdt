@@ -37,22 +37,6 @@ namespace StartupBackend.Data
                 new Roles { Id = 3, TenVaiTro = "COMPILER" }
             );
 
-            //tạo root admin
-            var defaultAdminPassword = BCrypt.Net.BCrypt.HashPassword("Admin@123");
-
-            modelBuilder.Entity<Accounts>().HasData(
-                new Accounts
-                {
-                    Id = 1,
-                    TenDangNhap = "admin",
-                    MatKhau = defaultAdminPassword,
-                    Email = "admin@system.com",
-                    HoTenNguoiDung = "Root Admin",
-                    TrangThai = "Hoạt động",
-                    VaiTroId = 1, 
-                    TenantId = "HCMCOU" 
-                }
-            );
         }
         }
     }
