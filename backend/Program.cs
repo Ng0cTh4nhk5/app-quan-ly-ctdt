@@ -13,16 +13,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IEmailService , EmailService>();
 
 // khởi tạo cấu hình JWT
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false, // tạm thời bỏ qua check nguồn phát
-            ValidateAudience = false, // tạm thời bỏ qua check người nhận
-            ValidateLifetime = true, // CÓ check thời hạn Token
+            ValidateIssuer = true, 
+            ValidateAudience = true, 
+            ValidateLifetime = true, 
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "Mot_chuoi_ki_tu_bi_mat_cuc_ky_dai_va_kho_doan_khoang_32_ki_tu_nhe"))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
     });
 
