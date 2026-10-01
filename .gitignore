@@ -1,5 +1,5 @@
 # Separate Documentation Repo
-
+appsettings.Development.json
 # Local AI tooling config
 .claude/
 
