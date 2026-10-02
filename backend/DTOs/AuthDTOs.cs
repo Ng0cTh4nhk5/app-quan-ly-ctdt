@@ -9,6 +9,7 @@
     public class LoginResponse
     {
         public string Token { get; set; }
+        public string RefreshToken { get; set; }
         public UserInfo User { get; set; }
     }
 
@@ -34,5 +35,10 @@
     {
         public string Token { get; set; }
         public string NewPassword { get; set; }
+    }
+
+    public class RefreshRequest
+    {
+        public string RefreshToken { get; set; }
     }
 }

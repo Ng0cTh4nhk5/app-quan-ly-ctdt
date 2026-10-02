@@ -17,7 +17,7 @@ namespace StartupBackend.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.25")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -96,21 +96,6 @@ namespace StartupBackend.Migrations
                     b.HasIndex("VaiTroId");
 
                     b.ToTable("TaiKhoans");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Email = "admin@system.com",
-                            HoTenNguoiDung = "Root Admin",
-                            IsFirstLogin = false,
-                            MatKhau = "$2a$11$MI7VEPRdZ9V3H9p1LU.57OvSFgPjViRCDvgjW/mB5oy1xpjn5PdPu",
-                            NgayTao = new DateTime(2026, 7, 2, 8, 24, 40, 681, DateTimeKind.Utc).AddTicks(377),
-                            TenDangNhap = "admin",
-                            TenantId = "HCMCOU",
-                            TrangThai = "Hoạt động",
-                            VaiTroId = 1
-                        });
                 });
 
             modelBuilder.Entity("StartupBackend.Models.Khoas", b =>
@@ -204,6 +189,37 @@ namespace StartupBackend.Migrations
                     b.HasKey("MaCTDT");
 
                     b.ToTable("ChuongTrinhDaoTaos");
+                });
+
+            modelBuilder.Entity("StartupBackend.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("StartupBackend.Models.Roles", b =>
@@ -319,6 +335,17 @@ namespace StartupBackend.Migrations
                     b.Navigation("MonHoc");
 
                     b.Navigation("NguoiBienSoan");
+                });
+
+            modelBuilder.Entity("StartupBackend.Models.RefreshToken", b =>
+                {
+                    b.HasOne("StartupBackend.Models.Accounts", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("StartupBackend.Models.Subjects", b =>
