@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using StartupBackend.Data;
@@ -19,62 +20,55 @@ namespace StartupBackend.Controllers
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly IAuthService _authService;
 
-        public AuthController(AppDbContext context, IConfiguration configuration, IEmailService emailService)
+        public AuthController(AppDbContext context, IConfiguration configuration, IEmailService emailService, IAuthService authService)
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
+            _authService = authService;
         }
 
-// API đăng nhập
+        // API đăng nhập
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _context.TaiKhoans
-                .Include(u => u.VaiTro)
-                .FirstOrDefaultAsync(u => u.TenDangNhap == request.Username);
-
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.MatKhau))
+            try
             {
-                return Unauthorized(new { message = "Sai tên đăng nhập hoặc mật khẩu!" });
+                var response = await _authService.LoginAsync(request);
+                return Ok(response);
             }
-
-            if (user.TrangThai != "Hoạt động")
+            catch (Exception ex)
             {
-                return Forbid("Tài khoản của bạn đang bị khóa!");
+                return Unauthorized(new { message = ex.Message });
             }
-
-            // Tạo Token JWT
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.TenDangNhap),
-                    new Claim(ClaimTypes.Role, user.VaiTro.TenVaiTro)
-                }),
-                Expires = DateTime.UtcNow.AddDays(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            
-            return Ok(new LoginResponse
-            {
-                Token = tokenHandler.WriteToken(token),
-                User = new UserInfo
-                {
-                    Role = user.VaiTro.TenVaiTro,
-                    Name = user.HoTenNguoiDung,
-                    IsFirstLogin = user.IsFirstLogin
-                }
-            });
         }
 
-// đổi mật khẩu lần đầu — yêu cầu đăng nhập (JWT claim cần được populate)
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+        {
+            try
+            {
+                var response = await _authService.RefreshTokenAsync(request.RefreshToken);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("revoke")]
+        public async Task<IActionResult> Revoke([FromBody] RefreshRequest request)
+        {
+            var result = await _authService.RevokeTokenAsync(request.RefreshToken);
+            if (!result) return BadRequest(new { message = "Token không hợp lệ hoặc đã bị thu hồi" });
+
+            return Ok(new { message = "Đã thu hồi token thành công (Đăng xuất)" });
+        }
+
+        // đổi mật khẩu lần đầu — yêu cầu đăng nhập (JWT claim cần được populate)
         [Authorize]
         [HttpPost("change-password-first")]
         public async Task<IActionResult> ChangePasswordFirst([FromBody] ChangePasswordFirstRequest request)

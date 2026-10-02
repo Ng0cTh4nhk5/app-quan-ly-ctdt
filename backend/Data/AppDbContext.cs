@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using StartupBackend.Models;
 using static StartupBackend.Models.Roles;
 
@@ -15,6 +15,7 @@ namespace StartupBackend.Data
             public DbSet<Subjects> MonHocs { get; set; }
             public DbSet<PhanCongBienSoan> PhanCongBienSoans { get; set; }
             public DbSet<Khoas> Khoas { get; set; }
+            public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,21 +39,21 @@ namespace StartupBackend.Data
             );
 
             //tạo root admin
-            var defaultAdminPassword = BCrypt.Net.BCrypt.HashPassword("Admin@123");
+            // var defaultAdminPassword = BCrypt.Net.BCrypt.HashPassword("Admin@123");
 
-            modelBuilder.Entity<Accounts>().HasData(
-                new Accounts
-                {
-                    Id = 1,
-                    TenDangNhap = "admin",
-                    MatKhau = defaultAdminPassword,
-                    Email = "admin@system.com",
-                    HoTenNguoiDung = "Root Admin",
-                    TrangThai = "Hoạt động",
-                    VaiTroId = 1, 
-                    TenantId = "HCMCOU" 
-                }
-            );
+            // modelBuilder.Entity<Accounts>().HasData(
+            //     new Accounts
+            //     {
+            //         Id = 1,
+            //         TenDangNhap = "admin",
+            //         MatKhau = defaultAdminPassword,
+            //         Email = "admin@system.com",
+            //         HoTenNguoiDung = "Root Admin",
+            //         TrangThai = "Hoạt động",
+            //         VaiTroId = 1, 
+            //         TenantId = "HCMCOU" 
+            //     }
+            // );
         }
         }
     }
