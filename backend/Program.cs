@@ -100,6 +100,8 @@ app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 
+app.UseMiddleware<StartupBackend.Middleware.ExceptionHandlingMiddleware>();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
@@ -112,7 +114,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
     // tự động chạy Migration cập nhật DB 
-    context.Database.Migrate();
+    //context.Database.Migrate();
 
     if (!context.TaiKhoans.Any(t => t.VaiTroId == 1))
     {
